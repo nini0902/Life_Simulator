@@ -3,69 +3,100 @@ const { createApp } = Vue
 const app = createApp({
     data() {
         return {
-            gameStarted: false,
-            playerName: '',
-            selectedTemplate: null,
-            characterTemplates: [
-                {
-                    title: '富二代',
-                    money: 1000000,
-                    health: 100,
-                    happiness: 90,
-                    description: '含著金湯匙出生，起始資金豐厚，但人生是否順遂還要看你自己。'
-                },
-                {
-                    title: '平凡學生',
-                    money: 5000,
-                    health: 100,
-                    happiness: 80,
-                    description: '普通的學生，擁有青春的活力，未來充滿各種可能。'
-                },
-                {
-                    title: '奮鬥創業家',
-                    money: 100000,
-                    health: 90,
-                    happiness: 70,
-                    description: '懷抱創業夢想，擁有一些啟動資金，但面臨更大的壓力。'
-                }
-            ],
+            gameState: 'start', // 'start', 'gender', 'playing', 'end'
             character: {
-                name: '',
-                age: 18,
-                health: 100,
-                money: 1000,
-                happiness: 100,
+                gender: '',
+                age: 0,
+                money: 50,        // 💰 初始金錢值
+                happiness: 50,    // 🤣 初始快樂值
+                health: 50,       // 💪 初始健康值
+                iq: 50,          // 🧠 初始智商值
+                clownIndex: 0,   // 🤡 初始胡鬧指數
+                fantasy: 0,      // 🦄 初始幻想值
             },
+            currentQuestionIndex: 0,
+            questions: [
+                {
+                    text: "小時候最愛的玩具是什麼？",
+                    options: [
+                        {
+                            text: "球球（至少很正常）",
+                            effects: { iq: 5, happiness: 5 }
+                        },
+                        {
+                            text: "木棍（在家打地鼠）",
+                            effects: { happiness: 10, clownIndex: 5 }
+                        },
+                        {
+                            text: "什麼都咬一下🤣",
+                            effects: { iq: -10, clownIndex: 15, health: -5 }
+                        }
+                    ]
+                },
+                {
+                    text: "上課時最喜歡做什麼？",
+                    options: [
+                        {
+                            text: "認真聽講（假的吧）",
+                            effects: { iq: 10, happiness: -5 }
+                        },
+                        {
+                            text: "畫老師的魔鬼漫畫",
+                            effects: { happiness: 10, clownIndex: 10, fantasy: 5 }
+                        },
+                        {
+                            text: "研究課桌椅的材質",
+                            effects: { iq: -5, clownIndex: 15 }
+                        }
+                    ]
+                }
+                // 其他問題待補充...
+            ],
             events: [],
             gameInterval: null
         }
     },    computed: {
-        canStartGame() {
-            return this.selectedTemplate !== null && this.playerName.trim() !== '';
+        currentQuestion() {
+            return this.questions[this.currentQuestionIndex];
+        },
+        ending() {
+            // 根據屬性值決定結局
+            const { money, happiness, health, iq, clownIndex, fantasy } = this.character;
+            
+            if (clownIndex >= 80) {
+                return {
+                    title: "🤡 地表最強白癡",
+                    description: "你的人生充滿了笑料，成為了一個活生生的迷因製造機！"
+                };
+            }
+            if (fantasy >= 80) {
+                return {
+                    title: "🦄 幻想大師",
+                    description: "現實對你來說太無聊了，你活在自己的童話世界裡～"
+                };
+            }
+            // 其他結局...
+            return {
+                title: "😅 平凡人生",
+                description: "至少你活著畢業了..."
+            };
         }
     },
     methods: {
-        // 選擇角色
-        selectCharacter(index) {
-            this.selectedTemplate = index;
-        },
-
         // 開始遊戲
         startGame() {
-            if (!this.canStartGame) return;
-            
-            const template = this.characterTemplates[this.selectedTemplate];
-            this.character = {
-                name: this.playerName,
-                age: 18,
-                health: template.health,
-                money: template.money,
-                happiness: template.happiness
-            };
-            
-            this.gameStarted = true;
-            this.startGameLoop();
-            this.addEvent(`${this.playerName}的人生旅程正式開始了！`);
+            this.gameState = 'gender';
+            this.addEvent("開始了一段不太正經的人生旅程...");
+        },
+
+        // 選擇性別
+        selectGender(gender) {
+            this.character.gender = gender;
+            if (gender === 'unknown') {
+                this.character.clownIndex += 10;
+                this.addEvent("連性別都搞不清楚，這人生絕對很精彩！🤣");
+            }
+            this.gameState = 'playing';
         },
 
         // 工作

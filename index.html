@@ -10,45 +10,123 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>    <div id="app">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a class="navbar-brand" href="#">人生模擬器</a>
-            </div>
-        </nav>
+        <!-- 開始畫面 -->
+        <div v-if="gameState === 'start'" class="container mt-5 text-center">
+            <h1 class="display-4 mb-3">🎭 白癡人生模擬器</h1>
+            <p class="lead mb-4">準備好迎接人生的荒謬挑戰了嗎？<br>這裡沒有政治，只有白癡和笑聲🤣</p>
+            <button @click="startGame" class="btn btn-lg btn-primary">開始遊戲</button>
+        </div>
 
-        <!-- 角色選擇畫面 -->
-        <div v-if="!gameStarted" class="container mt-4">
+        <!-- 性別選擇畫面 -->
+        <div v-if="gameState === 'gender'" class="container mt-5">
             <div class="row justify-content-center">
-                <div class="col-md-8">
+                <div class="col-md-8 text-center">
+                    <h2 class="mb-4">請選擇你的性別<br><small class="text-muted">（雖然這可能改變不了你荒謬的人生）</small></h2>
+                    <div class="d-grid gap-3">
+                        <button @click="selectGender('male')" class="btn btn-lg btn-outline-primary">👦 男</button>
+                        <button @click="selectGender('female')" class="btn btn-lg btn-outline-danger">👧 女</button>
+                        <button @click="selectGender('unknown')" class="btn btn-lg btn-outline-secondary">🫥 我也不知道</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 遊戲主畫面 -->
+        <div v-if="gameState === 'playing'" class="container mt-4">
+            <!-- 屬性面板 -->
+            <div class="row mb-4">
+                <div class="col-md-12">
                     <div class="card">
                         <div class="card-body">
-                            <h3 class="card-title text-center mb-4">選擇你的角色</h3>
                             <div class="row">
-                                <div v-for="(char, index) in characterTemplates" :key="index" class="col-md-4 mb-3">
-                                    <div class="card h-100" :class="{ 'border-primary': selectedTemplate === index }" @click="selectCharacter(index)">
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{ char.title }}</h5>
-                                            <div class="character-stats small">
-                                                <p>起始金錢：${{ char.money }}</p>
-                                                <p>健康：{{ char.health }}%</p>
-                                                <p>快樂：{{ char.happiness }}%</p>
-                                            </div>
-                                            <p class="card-text small">{{ char.description }}</p>
-                                        </div>
+                                <div class="col-md-2 text-center">
+                                    <h6>💰 金錢</h6>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar bg-success" :style="{ width: character.money + '%' }"></div>
                                     </div>
+                                    <small>{{ character.money }}</small>
                                 </div>
-                            </div>
-                            <div class="mt-4 text-center">
-                                <div class="mb-3">
-                                    <label class="form-label">你的名字：</label>
-                                    <input v-model="playerName" type="text" class="form-control" placeholder="請輸入名字">
+                                <div class="col-md-2 text-center">
+                                    <h6>🤣 快樂</h6>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar bg-warning" :style="{ width: character.happiness + '%' }"></div>
+                                    </div>
+                                    <small>{{ character.happiness }}</small>
                                 </div>
-                                <button @click="startGame" class="btn btn-primary" :disabled="!canStartGame">開始人生</button>
+                                <div class="col-md-2 text-center">
+                                    <h6>💪 健康</h6>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar bg-danger" :style="{ width: character.health + '%' }"></div>
+                                    </div>
+                                    <small>{{ character.health }}</small>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <h6>🧠 智商</h6>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar bg-info" :style="{ width: character.iq + '%' }"></div>
+                                    </div>
+                                    <small>{{ character.iq }}</small>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <h6>🤡 胡鬧</h6>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar bg-purple" :style="{ width: character.clownIndex + '%' }"></div>
+                                    </div>
+                                    <small>{{ character.clownIndex }}</small>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <h6>🦄 幻想</h6>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar bg-pink" :style="{ width: character.fantasy + '%' }"></div>
+                                    </div>
+                                    <small>{{ character.fantasy }}</small>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- 問題區域 -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title mb-4">{{ currentQuestion.text }}</h4>
+                            <div class="d-grid gap-3">
+                                <button 
+                                    v-for="(option, index) in currentQuestion.options" 
+                                    :key="index"
+                                    @click="selectOption(option)"
+                                    class="btn btn-lg btn-outline-primary text-start">
+                                    {{ option.text }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 事件日誌 -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body events-log">
+                            <p v-for="(event, index) in events" :key="index" 
+                               :class="{'text-muted': index > 0}">
+                                {{ event }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 結局畫面 -->
+        <div v-if="gameState === 'end'" class="container mt-5 text-center">
+            <h2 class="mb-4">{{ ending.title }}</h2>
+            <p class="lead mb-4">{{ ending.description }}</p>
+            <button @click="restartGame" class="btn btn-lg btn-primary">再來一次</button>
         </div>
 
         <!-- 遊戲主畫面 -->
