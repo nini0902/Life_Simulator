@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人生模擬器</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 自定義 CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>    <div id="app">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#">人生模擬器</a>
+            </div>
+        </nav>
+
+        <!-- 角色選擇畫面 -->
+        <div v-if="!gameStarted" class="container mt-4">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title text-center mb-4">選擇你的角色</h3>
+                            <div class="row">
+                                <div v-for="(char, index) in characterTemplates" :key="index" class="col-md-4 mb-3">
+                                    <div class="card h-100" :class="{ 'border-primary': selectedTemplate === index }" @click="selectCharacter(index)">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ char.title }}</h5>
+                                            <div class="character-stats small">
+                                                <p>起始金錢：${{ char.money }}</p>
+                                                <p>健康：{{ char.health }}%</p>
+                                                <p>快樂：{{ char.happiness }}%</p>
+                                            </div>
+                                            <p class="card-text small">{{ char.description }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 text-center">
+                                <div class="mb-3">
+                                    <label class="form-label">你的名字：</label>
+                                    <input v-model="playerName" type="text" class="form-control" placeholder="請輸入名字">
+                                </div>
+                                <button @click="startGame" class="btn btn-primary" :disabled="!canStartGame">開始人生</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 遊戲主畫面 -->
+        <div v-else class="container mt-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <!-- 角色資訊 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">角色資訊</h5>
+                            <div class="character-stats">
+                                <p>姓名：{{ character.name }}</p>
+                                <p>年齡：{{ character.age }} 歲</p>
+                                <p>健康：{{ character.health }}%</p>
+                                <p>金錢：${{ character.money }}</p>
+                                <p>快樂：{{ character.happiness }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <!-- 主要遊戲區域 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">生活事件</h5>
+                            <div class="action-buttons">
+                                <button @click="work" class="btn btn-primary me-2">工作</button>
+                                <button @click="study" class="btn btn-info me-2">學習</button>
+                                <button @click="relax" class="btn btn-success me-2">休息</button>
+                                <button @click="socialize" class="btn btn-warning">社交</button>
+                            </div>
+                            <div class="events-log mt-3">
+                                <p v-for="(event, index) in events" :key="index">
+                                    {{ event }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vue.js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 遊戲邏輯 -->
+    <script src="game.js"></script>
+</body>
+</html>
