@@ -144,6 +144,11 @@
                                 <div class="col-md-2 text-center">
                                     <h6>💪 健康</h6>
                                     <div class="progress mb-2">
+                                        <div class="progress-bar bg-danger" :style="{ width: character.health + '%' }"></div>
+                                    </div>
+                                    <small>{{ character.health }}</small>
+                                </div>
+                            </div>
                             
                             <h5 class="card-title mb-3 mt-4">特殊屬性</h5>
                             <div class="row stats-row">
