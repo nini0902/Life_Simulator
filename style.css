@@ -15,13 +15,34 @@ body {
 
 /* 進度條樣式 */
 .progress {
-    height: 10px;
+    height: 15px;
     border-radius: 5px;
     background-color: #eee;
+    margin: 0.5rem 0;
 }
 
 .progress-bar {
     transition: width 0.5s ease-in-out;
+}
+
+/* 屬性面板樣式 */
+.stats-row {
+    margin: 0 -0.5rem;
+}
+
+.stats-row .col-md-2 {
+    padding: 0.5rem;
+}
+
+.card h6 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.card small {
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 /* 卡片樣式 */
@@ -32,29 +53,139 @@ body {
     border-radius: 10px;
 }
 
+.card-body {
+    padding: 1rem;
+}
+
+/* 階段進度指示器 */
+.stage-progress {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto 2rem;
+}
+
+.stage-point {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.stage-point.active {
+    background: #007bff;
+    color: white;
+}
+
+.stage-point.completed {
+    background: #28a745;
+    color: white;
+}
+
+.stage-line {
+    height: 4px;
+    background: #f0f0f0;
+    flex-grow: 1;
+    margin: 0 10px;
+    position: relative;
+}
+
+.stage-line-progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: #28a745;
+    transition: width 0.3s ease;
+}
+
+.stage-label {
+    position: absolute;
+    top: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    color: #666;
+}
+
+.stage-point.active .stage-label {
+    color: #007bff;
+    font-weight: bold;
+}
+
 /* 事件日誌 */
 .events-log {
-    max-height: 200px;
+    max-height: 300px;
     overflow-y: auto;
     padding: 10px;
+    display: flex;
+    flex-direction: column;
 }
 
-.events-log p {
-    margin-bottom: 0.5rem;
-    padding: 0.5rem;
+.event-item {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background: #fff;
+    border: 1px solid #eee;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.event-content {
+    position: relative;
+    z-index: 1;
+}
+
+.attribute-changes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.badge {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.8rem;
+}
+
+/* 讓事件日誌容器永遠滾動到底部 */
+.events-log {
+    scroll-behavior: smooth;
+}
+
+.events-log::-webkit-scrollbar {
+    width: 8px;
+}
+
+.events-log::-webkit-scrollbar-track {
+    background: #f1f1f1;
     border-radius: 4px;
-    transition: opacity 0.3s;
 }
 
-.events-log p:first-child {
-    background-color: #f8f9fa;
-    font-weight: bold;
+.events-log::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.events-log::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 /* 按鈕樣式 */
 .btn-lg {
-    padding: 1rem 1.5rem;
-    font-size: 1.1rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
     border-radius: 8px;
 }
 
@@ -88,4 +219,16 @@ body {
 
 .card {
     animation: fadeIn 0.5s ease-out;
+}
+
+/* 屬性區塊響應式設計 */
+@media (max-width: 768px) {
+    .stats-row .col-md-2 {
+        width: 50%;
+        margin-bottom: 1rem;
+    }
+    
+    .stats-row {
+        margin: 0;
+    }
 }
