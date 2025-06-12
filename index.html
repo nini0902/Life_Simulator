@@ -1,44 +1,132 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" :data-theme="theme">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>人生模擬器</title>
+    <title>超廢人生指南</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- 自定義 CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body>    <div id="app">
+<body>
+    <div id="app">
+        <!-- 主題切換按鈕 -->
+        <button class="theme-toggle" @click="toggleTheme" :title="theme === 'dark' ? '切換至明亮模式' : '切換至深色模式'">
+            {{ theme === 'dark' ? '🌞' : '🌙' }}
+        </button>
+        
         <!-- 開始畫面 -->
         <div v-if="gameState === 'start'" class="container mt-5 text-center">
-            <h1 class="display-4 mb-3">🎭 白癡人生模擬器</h1>
-            <p class="lead mb-4">準備好迎接人生的荒謬挑戰了嗎？<br>這裡沒有政治，只有白癡和笑聲🤣</p>
+            <h1 class="display-4 mb-3">🎭 超廢人生指南</h1>
+            <p class="lead mb-4">這裡沒有憂慮，只有無限的躺平<br>準備好開始你最廢的人生了嗎？🤣</p>
             <button @click="startGame" class="btn btn-lg btn-primary">開始遊戲</button>
         </div>
 
         <!-- 性別選擇畫面 -->
         <div v-if="gameState === 'gender'" class="container mt-5">
             <div class="row justify-content-center">
-                <div class="col-md-8 text-center">
-                    <h2 class="mb-4">請選擇你的性別<br><small class="text-muted">（雖然這可能改變不了你荒謬的人生）</small></h2>
-                    <div class="d-grid gap-3">
-                        <button @click="selectGender('male')" class="btn btn-lg btn-outline-primary">👦 男</button>
-                        <button @click="selectGender('female')" class="btn btn-lg btn-outline-danger">👧 女</button>
-                        <button @click="selectGender('unknown')" class="btn btn-lg btn-outline-secondary">🫥 我也不知道</button>
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title text-center mb-4">選擇你的角色</h3>
+                            <div class="row">
+                                <div v-for="(char, index) in characterTemplates" :key="index" class="col-md-4 mb-3">
+                                    <div class="card h-100" :class="{ 'border-primary': selectedTemplate === index }" @click="selectCharacter(index)">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ char.title }}</h5>
+                                            <div class="character-stats small">
+                                                <p>起始金錢：${{ char.money }}</p>
+                                                <p>健康：{{ char.health }}%</p>
+                                                <p>快樂：{{ char.happiness }}%</p>
+                                            </div>
+                                            <p class="card-text small">{{ char.description }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 text-center">
+                                <div class="mb-3">
+                                    <label class="form-label">你的名字：</label>
+                                    <input v-model="playerName" type="text" class="form-control" placeholder="請輸入名字">
+                                </div>
+                                <button @click="startGame" class="btn btn-primary" :disabled="!canStartGame">開始人生</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 遊戲主畫面 -->
-        <div v-if="gameState === 'playing'" class="container mt-4">
-            <!-- 屬性面板 -->
-            <div class="row mb-4">
+            <!-- 事件日誌 -->
+            <div class="row mt-4">
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-body">
-                            <div class="row">
+                            <h5 class="card-title mb-3">事件日誌</h5>
+                            <!-- 階段進度指示器 -->
+                            <div class="stage-progress mb-4">
+                                <div class="stage-point" :class="{ 'active': character.stage === '幼兒園', 'completed': getStageIndex(character.stage) > 0 }">
+                                    <span>👶</span>
+                                    <div class="stage-label">幼兒園</div>
+                                </div>
+                                <div class="stage-line">
+                                    <div class="stage-line-progress" :style="{ width: getStageProgress(0) + '%' }"></div>
+                                </div>
+                                <div class="stage-point" :class="{ 'active': character.stage === '國小', 'completed': getStageIndex(character.stage) > 1 }">
+                                    <span>🧒</span>
+                                    <div class="stage-label">國小</div>
+                                </div>
+                                <div class="stage-line">
+                                    <div class="stage-line-progress" :style="{ width: getStageProgress(1) + '%' }"></div>
+                                </div>
+                                <div class="stage-point" :class="{ 'active': character.stage === '青少年', 'completed': getStageIndex(character.stage) > 2 }">
+                                    <span>🧑</span>
+                                    <div class="stage-label">青少年</div>
+                                </div>
+                                <div class="stage-line">
+                                    <div class="stage-line-progress" :style="{ width: getStageProgress(2) + '%' }"></div>
+                                </div>
+                                <div class="stage-point" :class="{ 'active': character.stage === '成年', 'completed': getStageIndex(character.stage) > 3 }">
+                                    <span>👨</span>
+                                    <div class="stage-label">成年</div>
+                                </div>
+                                <div class="stage-line">
+                                    <div class="stage-line-progress" :style="{ width: getStageProgress(3) + '%' }"></div>
+                                </div>
+                                <div class="stage-point" :class="{ 'active': character.stage === '社會', 'completed': getStageIndex(character.stage) > 4 }">
+                                    <span>💼</span>
+                                    <div class="stage-label">社會</div>
+                                </div>
+                            </div>
+                            <div class="events-log">
+                                <div v-for="(event, index) in events" :key="index" 
+                                   class="event-item">
+                                    <div class="event-content">
+                                        {{ event.text }}
+                                        <div v-if="event.changes" class="attribute-changes mt-2">
+                                            <span v-for="(value, key) in event.changes" 
+                                                  :key="key"
+                                                  class="badge me-2"
+                                                  :class="value > 0 ? 'bg-success' : 'bg-danger'">
+                                                {{ getAttributeEmoji(key) }} {{ key }}: {{ value > 0 ? '+' : '' }}{{ value }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 屬性面板 -->
+            <div class="row mt-4 mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">基本屬性</h5>
+                            <div class="row stats-row">
                                 <div class="col-md-2 text-center">
                                     <h6>💰 金錢</h6>
                                     <div class="progress mb-2">
@@ -60,10 +148,35 @@
                                     </div>
                                     <small>{{ character.health }}</small>
                                 </div>
+                            </div>
+                            
+                            <h5 class="card-title mb-3 mt-4">特殊屬性</h5>
+                            <div class="row stats-row">
+                                <div class="col-md-2 text-center">
+                                    <h6>😴 懶度</h6>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar bg-secondary" :style="{ width: character.lazy + '%' }"></div>
+                                    </div>
+                                    <small>{{ character.lazy }}</small>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <h6>😨 社恐</h6>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar bg-info" :style="{ width: character.socialFear + '%' }"></div>
+                                    </div>
+                                    <small>{{ character.socialFear }}</small>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <h6>🗯 鬼話</h6>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar bg-purple" :style="{ width: character.bullshit + '%' }"></div>
+                                    </div>
+                                    <small>{{ character.bullshit }}</small>
+                                </div>
                                 <div class="col-md-2 text-center">
                                     <h6>🧠 智商</h6>
                                     <div class="progress mb-2">
-                                        <div class="progress-bar bg-info" :style="{ width: character.iq + '%' }"></div>
+                                        <div class="progress-bar bg-primary" :style="{ width: character.iq + '%' }"></div>
                                     </div>
                                     <small>{{ character.iq }}</small>
                                 </div>
@@ -86,40 +199,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- 問題區域 -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title mb-4">{{ currentQuestion.text }}</h4>
-                            <div class="d-grid gap-3">
-                                <button 
-                                    v-for="(option, index) in currentQuestion.options" 
-                                    :key="index"
-                                    @click="selectOption(option)"
-                                    class="btn btn-lg btn-outline-primary text-start">
-                                    {{ option.text }}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 事件日誌 -->
-            <div class="row mt-4">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-body events-log">
-                            <p v-for="(event, index) in events" :key="index" 
-                               :class="{'text-muted': index > 0}">
-                                {{ event }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- 結局畫面 -->
@@ -127,46 +206,6 @@
             <h2 class="mb-4">{{ ending.title }}</h2>
             <p class="lead mb-4">{{ ending.description }}</p>
             <button @click="restartGame" class="btn btn-lg btn-primary">再來一次</button>
-        </div>
-
-        <!-- 遊戲主畫面 -->
-        <div v-else class="container mt-4">
-            <div class="row">
-                <div class="col-md-4">
-                    <!-- 角色資訊 -->
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">角色資訊</h5>
-                            <div class="character-stats">
-                                <p>姓名：{{ character.name }}</p>
-                                <p>年齡：{{ character.age }} 歲</p>
-                                <p>健康：{{ character.health }}%</p>
-                                <p>金錢：${{ character.money }}</p>
-                                <p>快樂：{{ character.happiness }}%</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-8">
-                    <!-- 主要遊戲區域 -->
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">生活事件</h5>
-                            <div class="action-buttons">
-                                <button @click="work" class="btn btn-primary me-2">工作</button>
-                                <button @click="study" class="btn btn-info me-2">學習</button>
-                                <button @click="relax" class="btn btn-success me-2">休息</button>
-                                <button @click="socialize" class="btn btn-warning">社交</button>
-                            </div>
-                            <div class="events-log mt-3">
-                                <p v-for="(event, index) in events" :key="index">
-                                    {{ event }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
