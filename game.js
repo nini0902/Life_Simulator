@@ -4,6 +4,31 @@ const app = createApp({
     data() {
         return {
             gameState: 'start',
+            playerName: '',
+            selectedTemplate: null,
+            characterTemplates: [
+                {
+                    title: "躺平咖",
+                    money: 30,
+                    health: 70,
+                    happiness: 60,
+                    description: "最佳的人生就是躺著"
+                },
+                {
+                    title: "社恐魂",
+                    money: 50,
+                    health: 50,
+                    happiness: 40,
+                    description: "拒絕社交，只想當邊緣人"
+                },
+                {
+                    title: "夢想家",
+                    money: 20,
+                    health: 60,
+                    happiness: 80,
+                    description: "活在自己的小世界"
+                }
+            ],
             character: {
                 gender: '',
                 money: 50,        // 💰 初始金錢值
@@ -1023,13 +1048,29 @@ const app = createApp({
             );
 
             return this.characterTypes[bestMatch.type];
+        },
+        canStartGame() {
+            return this.playerName.trim() !== '' && this.selectedTemplate !== null;
+        },
+        totalProgress() {
+            const totalQuestions = this.questions.length;
+            return Math.min(100, (this.currentQuestionIndex / totalQuestions) * 100);
         }
     },
     methods: {
         // 開始遊戲
         startGame() {
-            this.gameState = 'gender';
-            this.addEvent("開始了一段不太正經的人生旅程...");
+            if (this.gameState === 'start') {
+                this.gameState = 'gender';
+                this.addEvent("開始了一段不太正經的人生旅程...");
+            } else if (this.gameState === 'gender' && this.canStartGame) {
+                this.gameState = 'playing';
+                this.character.stage = '幼兒園';  // 確保從幼兒園開始
+                this.currentQuestionIndex = 0;    // 重置問題索引
+                this.addEvent(`${this.playerName} 開始了新的人生！`);
+                const template = this.characterTemplates[this.selectedTemplate];
+                this.addEvent(`選擇了 ${template.title} 型人生！`);
+            }
         },
 
         // 選擇性別
@@ -1113,6 +1154,8 @@ const app = createApp({
 
         // 選擇選項
         selectOption(option) {
+            if (!this.currentQuestion) return;  // 如果沒有當前問題，直接返回
+            
             const changes = {};
             Object.entries(option.effects).forEach(([key, value]) => {
                 this.character[key] = Math.max(0, Math.min(100, this.character[key] + value));
@@ -1262,6 +1305,13 @@ const app = createApp({
             const finalType = this.finalCharacterType;
             this.addEvent(`🎭 你的荒謬人生結局：${finalType.title}`);
             this.addEvent(`📝 ${finalType.description}`);
+        },
+        selectCharacter(index) {
+            this.selectedTemplate = index;
+            const template = this.characterTemplates[index];
+            this.character.money = template.money;
+            this.character.health = template.health;
+            this.character.happiness = template.happiness;
         }
     },
     mounted() {

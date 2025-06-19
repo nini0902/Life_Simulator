@@ -58,47 +58,45 @@
             </div>
         </div>
 
+        <!-- 遊戲主區域 -->
+        <div v-if="gameState === 'playing'" class="container mt-4">
+            <!-- 階段進度指示器 -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">人生階段</h5>
+                    <div class="stage-progress">
+                        <div class="stage-progress-bar" :style="{ width: totalProgress + '%' }"></div>
+                    </div>
+                    <div class="stage-labels">
+                        <span v-for="stage in stages" :key="stage" 
+                              :class="{ 'active': stage === character.stage }">
+                            {{ stage }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 問題區域 -->
+            <div v-if="currentQuestion" class="question-container card mt-4">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">{{ currentQuestion.text }}</h4>
+                    <div class="options">
+                        <button v-for="(option, index) in currentQuestion.options"
+                                :key="index"
+                                @click="selectOption(option)"
+                                class="option-button">
+                            {{ option.text }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- 事件日誌 -->
             <div class="row mt-4">
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title mb-3">事件日誌</h5>
-                            <!-- 階段進度指示器 -->
-                            <div class="stage-progress mb-4">
-                                <div class="stage-point" :class="{ 'active': character.stage === '幼兒園', 'completed': getStageIndex(character.stage) > 0 }">
-                                    <span>👶</span>
-                                    <div class="stage-label">幼兒園</div>
-                                </div>
-                                <div class="stage-line">
-                                    <div class="stage-line-progress" :style="{ width: getStageProgress(0) + '%' }"></div>
-                                </div>
-                                <div class="stage-point" :class="{ 'active': character.stage === '國小', 'completed': getStageIndex(character.stage) > 1 }">
-                                    <span>🧒</span>
-                                    <div class="stage-label">國小</div>
-                                </div>
-                                <div class="stage-line">
-                                    <div class="stage-line-progress" :style="{ width: getStageProgress(1) + '%' }"></div>
-                                </div>
-                                <div class="stage-point" :class="{ 'active': character.stage === '青少年', 'completed': getStageIndex(character.stage) > 2 }">
-                                    <span>🧑</span>
-                                    <div class="stage-label">青少年</div>
-                                </div>
-                                <div class="stage-line">
-                                    <div class="stage-line-progress" :style="{ width: getStageProgress(2) + '%' }"></div>
-                                </div>
-                                <div class="stage-point" :class="{ 'active': character.stage === '成年', 'completed': getStageIndex(character.stage) > 3 }">
-                                    <span>👨</span>
-                                    <div class="stage-label">成年</div>
-                                </div>
-                                <div class="stage-line">
-                                    <div class="stage-line-progress" :style="{ width: getStageProgress(3) + '%' }"></div>
-                                </div>
-                                <div class="stage-point" :class="{ 'active': character.stage === '社會', 'completed': getStageIndex(character.stage) > 4 }">
-                                    <span>💼</span>
-                                    <div class="stage-label">社會</div>
-                                </div>
-                            </div>
                             <div class="events-log">
                                 <div v-for="(event, index) in events" :key="index" 
                                    class="event-item">
